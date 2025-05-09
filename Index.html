@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pi-Note</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f9f9f9;
+    }
+  
+    header {
+      background: #8f53e9;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+    }
+  
+    nav {
+      background: #af58c1;
+      display: flex;
+      justify-content: space-around;
+      padding: 0.5rem;
+    }
+  
+    nav button {
+      background: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  
+    .container {
+      padding: 1rem;
+      max-width: 800px;
+      margin: auto;
+    }
+  
+    section {
+      display: none;
+    }
+  
+    section.active {
+      display: block;
+    }
+  
+    input, select, textarea, button {
+      padding: 0.5rem;
+      margin: 0.5rem 0;
+      width: 100%;
+      box-sizing: border-box;
+    }
+  
+    .apunte {
+      background: white;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border-radius: 6px;
+      box-shadow: 0 0 5px #ccc;
+    }
+  
+    .apunte button {
+      background: #8f53e9;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+    }
+  
+    h2 {
+      color: #8f53e9;
+    }
+  
+    .small {
+      font-size: 0.9rem;
+      color: gray;
+    }
+  </style>
+  
+</head>
+<body>
+
+<header>
+  <h1>📘 Pi-Note</h1>
+  <p>App universitaria para apuntes de matemáticas</p>
+</header>
+
+<nav>
+  <button onclick="mostrarPagina('inicio')">Inicio</button>
+  <button onclick="mostrarPagina('buscar')">Buscar</button>
+  <button onclick="mostrarPagina('subir')">Subir</button>
+  <button onclick="mostrarPagina('perfil')">Mi Perfil</button>
+</nav>
+
+<div class="container">
+  <!-- Página de Inicio -->
+  <section id="inicio" class="active">
+    <h2>Bienvenido a Pi-Note</h2>
+    <p>Encuentra o comparte apuntes matemáticos de forma fácil, organizada y segura. Únete a nuestra comunidad de estudiantes que colaboran para aprender mejor.</p>
+  </section>
+
+  <!-- Página de búsqueda -->
+  <section id="buscar">
+    <h2>🔍 Buscar Apuntes</h2>
+    <input type="text" id="buscador" placeholder="Ej. Álgebra, Cálculo, etc." onkeyup="buscarApuntes()">
+    <select id="semestre" onchange="buscarApuntes()">
+      <option value="">Todos los semestres</option>
+      <option value="1">1er Semestre</option>
+      <option value="2">2do Semestre</option>
+    </select>
+    <div id="resultados"></div>
+  </section>
+
+  <!-- Página de subida -->
+  <section id="subir">
+    <h2>⬆️ Subir Apunte</h2>
+    <input type="text" id="titulo" placeholder="Título del apunte" />
+    <select id="semestreSubida">
+      <option value="1">1er Semestre</option>
+      <option value="2">2do Semestre</option>
+    </select>
+    <textarea id="descripcion" rows="3" placeholder="Descripción o temas que cubre"></textarea>
+    <button onclick="subirApunte()">Subir</button>
+  </section>
+
+  <!-- Página de perfil -->
+  <section id="perfil">
+    <h2>👤 Mi Perfil</h2>
+    <div id="misApuntes"></div>
+  </section>
+</div>
+
+<script>
+  const apuntes = [
+    { titulo: "Cálculo 1 - Integrales", semestre: "1", descripcion: "Resumen con ejercicios resueltos", autor: "Carlos M." },
+    { titulo: "Álgebra Lineal - Matrices", semestre: "1", descripcion: "Teoría + ejemplos prácticos", autor: "Laura G." },
+    { titulo: "Cálculo 2 - Derivadas", semestre: "2", descripcion: "Conceptos clave y fórmulas", autor: "Ana P." }
+  ];
+  const misApuntes = [];
+
+  function mostrarPagina(id) {
+    const secciones = document.querySelectorAll('section');
+    secciones.forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    if (id === 'buscar') buscarApuntes();
+    if (id === 'perfil') renderApuntes(misApuntes, "misApuntes");
+  }
+
+  function buscarApuntes() {
+    const texto = document.getElementById("buscador").value.toLowerCase();
+    const semestre = document.getElementById("semestre").value;
+    const filtrados = apuntes.filter(a =>
+      a.titulo.toLowerCase().includes(texto) &&
+      (semestre === "" || a.semestre === semestre)
+    );
+    renderApuntes(filtrados, "resultados");
+  }
+
+  function subirApunte() {
+    const titulo = document.getElementById("titulo").value;
+    const semestre = document.getElementById("semestreSubida").value;
+    const descripcion = document.getElementById("descripcion").value;
+    if (titulo && descripcion) {
+      const nuevo = { titulo, semestre, descripcion, autor: "Tú" };
+      misApuntes.push(nuevo);
+      apuntes.push(nuevo);
+      alert("Apunte subido correctamente.");
+      document.getElementById("titulo").value = "";
+      document.getElementById("descripcion").value = "";
+      mostrarPagina("perfil");
+    } else {
+      alert("Completa todos los campos.");
+    }
+  }
+
+  function renderApuntes(lista, destino) {
+    const contenedor = document.getElementById(destino);
+    contenedor.innerHTML = "";
+    lista.forEach((a) => {
+      contenedor.innerHTML += `
+        <div class="apunte">
+          <strong>${a.titulo}</strong> <span class="small">(Semestre ${a.semestre})</span><br/>
+          <p>${a.descripcion}</p>
+          <p class="small">Autor: ${a.autor}</p>
+          <button onclick="alert('Descarga simulada de: ${a.titulo}')">Descargar</button>
+        </div>
+      `;
+    });
+  }
+
+  mostrarPagina("inicio");
+</script>
+
+</body>
+</html>
